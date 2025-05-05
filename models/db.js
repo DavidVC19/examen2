@@ -8,18 +8,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   port: 5432,
   ssl: {
-    rejectUnauthorized: false, // importante para Render
-  },
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 20000,
-  max: 20
-});
-
-pool.connect((err) => {
-  if (err) {
-    console.error('Error de conexión a la base de datos:', err);
-  } else {
-    console.log('✅ Conectado a la base de datos PostgreSQL');
+    rejectUnauthorized: false, // NECESARIO para Render
   }
 });
 
