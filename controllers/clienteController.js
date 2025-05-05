@@ -27,11 +27,35 @@ exports.createCliente = async (req, res) => {
   }
 };
 
+exports.updateCliente = async (req, res) => {
+  const { id } = req.params;
+  const { nombre, telefono } = req.body;
+  if (!nombre || !telefono) {
+    return res.status(400).json({ error: 'Nombre y teléfono son obligatorios' });
+  }
+  try {
+    const result = await db.query(
+      'UPDATE cliente SET nombre = $1, telefono = $2 WHERE id = $3 RETURNING *',
+      [nombre, telefono, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('❌ Error al actualizar cliente:', err);
+    res.status(500).json({ error: 'Error al actualizar cliente' });
+  }
+};
+
 exports.deleteCliente = async (req, res) => {
   const { id } = req.params;
   try {
-    await db.query('DELETE FROM cliente WHERE id = $1', [id]);
-    res.json({ message: 'Cliente eliminado' });
+    const result = await db.query('DELETE FROM cliente WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+    res.json({ message: 'Cliente eliminado', cliente: result.rows[0] });
   } catch (err) {
     console.error('❌ Error al eliminar cliente:', err);
     res.status(500).json({ error: 'Error al eliminar cliente' });
