@@ -3,35 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <title>Clientes</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="container mt-4">
-  <h1 class="mb-4">Lista de Clientes</h1>
-  <table class="table table-bordered">
+<body class="container py-4">
+  <h1 class="mb-4">Clientes</h1>
+  <a href="crearCliente.html" class="btn btn-success mb-3">Nuevo Cliente</a>
+  <table class="table table-striped">
     <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Teléfono</th>
-      </tr>
+      <tr><th>Nombre</th><th>Teléfono</th><th>Acciones</th></tr>
     </thead>
     <tbody id="tablaClientes"></tbody>
   </table>
 
   <script>
-    fetch('/api/clientes')
-      .then(res => res.json())
-      .then(data => {
-        const tabla = document.getElementById('tablaClientes');
-        data.forEach(cliente => {
-          const fila = `
-            <tr>
-              <td>${cliente.nombre}</td>
-              <td>${cliente.telefono}</td>
-            </tr>
-          `;
-          tabla.innerHTML += fila;
-        });
+    const tabla = document.getElementById('tablaClientes');
+
+    async function cargarClientes() {
+      const res = await fetch('/api/clientes');
+      const clientes = await res.json();
+      tabla.innerHTML = '';
+      clientes.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.nombre}</td>
+          <td>${c.telefono}</td>
+          <td>
+            <a href="editarCliente.html?id=${c.id}" class="btn btn-sm btn-primary">Editar</a>
+            <button class="btn btn-sm btn-danger" onclick="eliminar(${c.id})">Eliminar</button>
+          </td>
+        `;
+        tabla.appendChild(tr);
       });
+    }
+
+    async function eliminar(id) {
+      if (!confirm('¿Seguro que quieres eliminar este cliente?')) return;
+      const res = await fetch(`/api/clientes/${id}`, { method: 'DELETE' });
+      if (res.ok) cargarClientes();
+      else alert('Error al eliminar cliente');
+    }
+
+    cargarClientes();
   </script>
 </body>
 </html>
